@@ -5,11 +5,11 @@
 # to check annotations.
 # these usually go inside or in the "middle" of the function
 # but still before the code starts
-
-import typing
-import requests
 import io
+import requests
 import pandas as pd
+from pandas import DataFrame
+# for stubs, if it says ur missing them do  mypy --install-types
 # use pylint, mypy and pep8 extensions as linters (you might have to install
 # with pip inaddition to the python extension)
 # this is what types look like in python, we are going to use this to type
@@ -25,20 +25,25 @@ SHEETURL: str = (
     "edit?resourcekey=&gid=1530912831#gid=1530912831"
 )
 
-# format for CSV https://docs.google.com/spreadsheets/d/<SHEET_ID>/gviz/tq?tqx=out:csv&sheet=<SHEET_NAME>
+# format for CSV https://docs.google.com/spreadsheets/d/
+# <SHEET_ID>/gviz/tq?tqx=
+# out:csv&sheet=<SHEET_NAME>
 SHEET_CSV_URL: str = (
     "https://docs.google.com/spreadsheets/d/"
     "1sptWDnGOyRcEyCHFYhyC8Y_zXGGM5jMpePRVusoSkFs/"
-    "gviz/tq?tqx=out:csv&sheet="
+    "gviz/tq?tqx=out:csv&sheet=Altered/congregrated data"
 )
 
 
-def get_data() -> typing.Any:  # idealy we dont want to us Any, but for now
-    """function to get the data from the google sheet"""
+def get_data() -> DataFrame:  # idealy we dont want to us Any, but for now
+    """function to get the data from the google sheet
+    raises: HTTPError: if the request fails (meaning url wrong or no inter)
+
+    @returns: @type(DataFrame): the data from the google sheet"""
 
     response = requests.get(SHEET_CSV_URL)
     response.raise_for_status()  # Raise error if request fails
-    df = pd.read_csv(SHEETURL)
+    df: DataFrame = pd.read_csv(io.StringIO(response.text))
     return df
 
 
