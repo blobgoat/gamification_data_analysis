@@ -280,6 +280,7 @@ def linear_visualization(models, features, y_cols):
         coef_list = pd.DataFrame({"Feature": features, "Coef": coef})
         coef_list["abs"] = coef_list["Coef"].abs()
         top = coef_list.nlargest(10, "abs")
+        print(top["Feature"], top["Coef"])
 
         plt.figure(figsize = (10,5))
         plt.barh(top["Feature"], top["Coef"])
