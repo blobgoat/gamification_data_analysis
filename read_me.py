@@ -12,6 +12,8 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from pandas import DataFrame
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 # from sklearn.model_selection import train_test_split
 from sklearn.linear_model import Lasso
@@ -58,7 +60,7 @@ X_DEMO_COLS = [
     "Which categories best describe you?",
     "Do you have any chronic condition that substantially limit your life activities?",
     "If you have a disability, please indicate (if comfortable) the terms"
-    "that best describe the condition(s)",
+    " that best describe the condition(s)",
     "Which economic class do you identify with?",
     "RELIGION (Congregated)"
 ]
@@ -137,10 +139,14 @@ def main():
 
     # pre-processing
     x_data, y_data = split_xy(data, X_DROP_COLS)
-    y1, y2, y3, y4 = [y_data[:, i] for i in y_data.shape[1]]
+    y1, y2, y3, y4 = [y_data.iloc[:, i] for i in range(y_data.shape[1])]
+    x_nan = x_data.isna().sum().sum()
+    y_nan = y_data.isna().sum().sum()
+    print("NaN values", x_nan, y_nan)
+    # NaN check
+
 
     # 70% train 20% validation 10% test
-    x_data, y_data = split_xy(data, X_DROP_COLS)
     x_train, x_temp, y_train, y_temp = train_test_split(
         x_data, y_data, test_size=0.3)
     x_val, x_test, y_val, y_test = train_test_split(
@@ -151,6 +157,8 @@ def main():
     # feature selection
 
     # model
+    linear_regression(x_train, y_train, x_val, y_val)
+
 
 
 def split_xy(data, drop_cols):
@@ -174,10 +182,19 @@ def split_xy(data, drop_cols):
                    }
     x_data[X_SEAL_COLS] = x_data[X_SEAL_COLS].replace(options_map)
 
-    # one-hot-encoding for categorical data (demographics, gaming)
-    x_data = pd.get_dummies(x_data).to_numpy()
+    # handle NaN via imputation
+    x_data[X_GAME_COLS[0:2]] = x_data[X_GAME_COLS[0:2]].fillna('No Response')
+    x_data[X_GAME_COLS[2]] = x_data[X_GAME_COLS[2]].fillna(3)
+    x_data[X_GAME_COLS[3:]] = x_data[X_GAME_COLS[3:]].fillna(3)
+    x_data[X_DEMO_COLS] = x_data[X_DEMO_COLS].fillna('No Response')
+    x_data[X_SEAL_COLS] = x_data[X_SEAL_COLS].fillna(3)
+    x_data[X_USABILITY_COLS] = x_data[X_USABILITY_COLS].fillna(3)
+    data[Y_COLS] = data[Y_COLS].fillna(3)
 
-    y_data = data[Y_COLS].to_numpy()
+    # one-hot-encoding for categorical data (demographics, gaming)
+    cat_col = x_data.select_dtypes(include=['object', 'category']).columns
+    x_data = pd.get_dummies(x_data, columns = cat_col)
+    y_data = data[Y_COLS]
     return x_data, y_data
 
 
@@ -190,10 +207,9 @@ def standardize(x_train, x_val, x_test):
     @paremeter: x_test @type(nd.array) processed x-test data to be standardized
     """
     scaler = StandardScaler().fit(x_train)  # only fit on training data
-    x_train_stand = scaler.transform(x_train)
-    x_val_stand = scaler.transform(x_val)
-    x_test_stand = scaler.transform(x_test)
-
+    x_train_stand = pd.DataFrame(scaler.transform(x_train), columns=x_train.columns, index=x_train.index)
+    x_val_stand = pd.DataFrame(scaler.transform(x_val), columns=x_val.columns, index=x_val.index)
+    x_test_stand = pd.DataFrame(scaler.transform(x_test), columns=x_test.columns, index=x_test.index)
     return x_train_stand, x_val_stand, x_test_stand
 
 
@@ -214,8 +230,64 @@ def feature_selection(x_train, y_train):
 
         lasso_val = lasso_model.predict(x_train)
         rmse_validation = np.sqrt(mean_squared_error(y_train, lasso_val))
-        lasso_data.loc[len(lasso_data)] = [l1, lasso_model,
-                                           rmse_train, rmse_validation]
+        lasso_data.loc[len(lasso_data)] = [l1, lasso_model, rmse_train, rmse_validation]
+
+    # inspect coefficients
+    best_l1 = None
+    rmse_test_lasso = None
+    num_zero_coeffs_lasso = None
+    indx = lasso_data['rmse_validation'].idxmin()
+    best_l1 = lasso_data.loc[indx]['l1_penalty']
+    best_mod = lasso_data.loc[indx]['model']
+    num_zero_coeffs_lasso = np.count_nonzero(best_mod.coef_ == 0)
+    print("Best L1", best_l1)
+    print("num zero coef", num_zero_coeffs_lasso)
+
+    # see minimized features
+    all_features = x_train.columns
+    zero_coef = []
+    for feature, coef in zip(all_features, best_mod.coef_):
+        if abs(coef) <= 10 ** -17:
+            zero_coef.append(feature)
+    print(zero_coef)
+
+    return best_l1
+
+def linear_regression(x_train, y_train, x_val, y_val):
+    models = []
+    train_rmse = []
+    val_rmse = []
+    for i in range(y_train.shape[1]):
+        y_t = y_train.iloc[:,i]
+        y_v = y_val.iloc[:,i]
+        model = LinearRegression().fit(x_train, y_t)
+        predict_t = model.predict(x_train)
+        t_rmse = np.sqrt(mean_squared_error(y_t, predict_t))
+        predict_v = model.predict(x_val)
+        v_rmse = np.sqrt(mean_squared_error(y_v, predict_v))
+
+        train_rmse.append(t_rmse)
+        val_rmse.append(v_rmse)
+        models.append(model)
+    print(x_train.columns)
+    linear_visualization(models, x_train.columns, y_train.columns)
+    return models, train_rmse, val_rmse
+
+def linear_visualization(models, features, y_cols):
+    for i, model in enumerate(models):
+        coef = model.coef_
+
+        coef_list = pd.DataFrame({"Feature": features, "Coef": coef})
+        coef_list["abs"] = coef_list["Coef"].abs()
+        top = coef_list.nlargest(10, "abs")
+
+        plt.figure(figsize = (10,5))
+        plt.barh(top["Feature"], top["Coef"])
+        plt.xticks(rotation=45, ha="right")
+        plt.xlabel("Features")
+        plt.ylabel("Coef values")
+        plt.title(f"{y_cols[i]}")
+        plt.show()
 
 
 # notice that in python things compile sequentially,
