@@ -5,6 +5,15 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "microsoft-python-type-stubs"
 dynamic = ["version"]
+dependencies = [
+    "matplotlib==3.10.1",
+    "numpy==2.2.3",
+    "pandas==2.2.3",
+    "requests==2.32.3",
+    "scikit-learn==1.6.1",
+]
+
+# everything below is linter stuff
 
 # Allow these stubs to be installed from GitHub
 # We need an explicit mapping instead of just
@@ -29,6 +38,8 @@ target-version = "py39"
 [tool.ruff.lint]
 # TODO: Use extend-select instead to get base E and F rules that don't conflict with the formatter
 select = [
+    "E",   # PEP8 errors
+    "F",   # Fixable PEP8 issues
     "FA", # flake8-future-annotations
     "I", # isort
     "PYI", # flake8-pyi
