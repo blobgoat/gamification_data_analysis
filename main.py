@@ -278,6 +278,7 @@ def linear_regression(x_train, y_train, x_val, y_val):
 
 
 def linear_visualization(models, features, y_cols):
+    """function to visualize the linear regression model coefficients"""
     for i, model in enumerate(models):
         coef = model.coef_
 
