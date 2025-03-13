@@ -145,7 +145,6 @@ def main():
     print("NaN values", x_nan, y_nan)
     # NaN check
 
-
     # 70% train 20% validation 10% test
     x_train, x_temp, y_train, y_temp = train_test_split(
         x_data, y_data, test_size=0.3)
@@ -158,7 +157,6 @@ def main():
 
     # model
     linear_regression(x_train, y_train, x_val, y_val)
-
 
 
 def split_xy(data, drop_cols):
@@ -193,7 +191,7 @@ def split_xy(data, drop_cols):
 
     # one-hot-encoding for categorical data (demographics, gaming)
     cat_col = x_data.select_dtypes(include=['object', 'category']).columns
-    x_data = pd.get_dummies(x_data, columns = cat_col)
+    x_data = pd.get_dummies(x_data, columns=cat_col)
     y_data = data[Y_COLS]
     return x_data, y_data
 
@@ -207,9 +205,12 @@ def standardize(x_train, x_val, x_test):
     @paremeter: x_test @type(nd.array) processed x-test data to be standardized
     """
     scaler = StandardScaler().fit(x_train)  # only fit on training data
-    x_train_stand = pd.DataFrame(scaler.transform(x_train), columns=x_train.columns, index=x_train.index)
-    x_val_stand = pd.DataFrame(scaler.transform(x_val), columns=x_val.columns, index=x_val.index)
-    x_test_stand = pd.DataFrame(scaler.transform(x_test), columns=x_test.columns, index=x_test.index)
+    x_train_stand = pd.DataFrame(scaler.transform(
+        x_train), columns=x_train.columns, index=x_train.index)
+    x_val_stand = pd.DataFrame(scaler.transform(
+        x_val), columns=x_val.columns, index=x_val.index)
+    x_test_stand = pd.DataFrame(scaler.transform(
+        x_test), columns=x_test.columns, index=x_test.index)
     return x_train_stand, x_val_stand, x_test_stand
 
 
@@ -230,7 +231,8 @@ def feature_selection(x_train, y_train):
 
         lasso_val = lasso_model.predict(x_train)
         rmse_validation = np.sqrt(mean_squared_error(y_train, lasso_val))
-        lasso_data.loc[len(lasso_data)] = [l1, lasso_model, rmse_train, rmse_validation]
+        lasso_data.loc[len(lasso_data)] = [l1, lasso_model,
+                                           rmse_train, rmse_validation]
 
     # inspect coefficients
     best_l1 = None
@@ -253,13 +255,14 @@ def feature_selection(x_train, y_train):
 
     return best_l1
 
+
 def linear_regression(x_train, y_train, x_val, y_val):
     models = []
     train_rmse = []
     val_rmse = []
     for i in range(y_train.shape[1]):
-        y_t = y_train.iloc[:,i]
-        y_v = y_val.iloc[:,i]
+        y_t = y_train.iloc[:, i]
+        y_v = y_val.iloc[:, i]
         model = LinearRegression().fit(x_train, y_t)
         predict_t = model.predict(x_train)
         t_rmse = np.sqrt(mean_squared_error(y_t, predict_t))
@@ -273,6 +276,7 @@ def linear_regression(x_train, y_train, x_val, y_val):
     linear_visualization(models, x_train.columns, y_train.columns)
     return models, train_rmse, val_rmse
 
+
 def linear_visualization(models, features, y_cols):
     for i, model in enumerate(models):
         coef = model.coef_
@@ -282,7 +286,7 @@ def linear_visualization(models, features, y_cols):
         top = coef_list.nlargest(10, "abs")
         print(top["Feature"], top["Coef"])
 
-        plt.figure(figsize = (10,5))
+        plt.figure(figsize=(10, 5))
         plt.barh(top["Feature"], top["Coef"])
         plt.xticks(rotation=45, ha="right")
         plt.xlabel("Features")

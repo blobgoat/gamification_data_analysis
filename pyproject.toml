@@ -1,0 +1,134 @@
+[build-system]
+requires = ["setuptools >= 69.0"] # v69 includes type information by default
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "microsoft-python-type-stubs"
+dynamic = ["version"]
+
+# Allow these stubs to be installed from GitHub
+# We need an explicit mapping instead of just
+# [tool.setuptools]
+# package-dir = {"" = "stubs"}
+# because the folder names don't all match "*-stubs" 
+# see https://github.com/microsoft/python-type-stubs/issues/315
+[tool.setuptools.package-dir]
+# See README.md as to why matplotlib is not included
+"networkx-stubs" = "stubs/networkx"
+"skimage-stubs" = "stubs/skimage"
+"sklearn-stubs" = "stubs/sklearn"
+"sympy-stubs" = "stubs/sympy-stubs"
+"transformers-stubs" = "stubs/transformers-stubs"
+"vispy-stubs" = "stubs/vispy"
+
+[tool.ruff]
+line-length = 130
+# Target oldest supported Python version
+target-version = "py39"
+
+[tool.ruff.lint]
+# TODO: Use extend-select instead to get base E and F rules that don't conflict with the formatter
+select = [
+    "FA", # flake8-future-annotations
+    "I", # isort
+    "PYI", # flake8-pyi
+]
+ignore = [
+    ###
+    # Rules we don't want or don't agree with
+    ###
+    # Typeshed doesn't want complex or non-literal defaults, or long strings, for maintenance and testing reasons.
+    # This doesn't affect us, let's have more complete stubs.
+    "PYI011",
+    "PYI014",
+    "PYI053",
+
+    # TODO: Handle in its own PR
+    "PYI021", # https://github.com/microsoft/python-type-stubs/pull/343
+
+    # TODO: Investigate and fix or configure
+    "PYI001",
+    "PYI002",
+    "PYI017",
+    "PYI019", # Request for more autofixes: https://github.com/astral-sh/ruff/issues/15798
+    "PYI024",
+    "PYI048",
+    "PYI051", # Request for autofix: https://github.com/astral-sh/ruff/issues/14185
+    "PYI052",
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+extra-standard-library = [
+    # Group these with stdlib
+    "typing_extensions",
+    "_typeshed",
+]
+
+[tool.pyright]
+exclude = ["build", ".git"]
+stubPath = "./stubs"
+# Target oldest supported Python version
+pythonversion = "3.9"
+typeCheckingMode = "standard"
+# Partial stubs are acceptable
+reportUnknownArgumentType = false
+# Stubs-only packages are fine for testing
+reportMissingModuleSource = false
+# Stubs are allowed to use private variables
+reportPrivateUsage = false
+reportPrivateImportUsage = false
+# Incompatible overrides and property type mismatches are out of our stubs' control
+# as they are inherited from the implementation.
+reportIncompatibleMethodOverride = false
+reportIncompatibleVariableOverride = false
+reportPropertyTypeMismatch = false
+# Overlapping overloads are often necessary in a stub, meaning pyright's check
+# (which is stricter than mypy's; see mypy issue #10143 and #10157)
+# would cause many false positives and catch few bugs.
+reportOverlappingOverload = false
+# The name of the self/cls parameter is out of third-party stubs' control.
+reportSelfClsParameterName = false
+# Not an error by default in standard mode
+reportUnsupportedDunderAll = "error"
+
+[tool.mypy]
+# Target oldest supported Python version
+python_version = "3.9"
+# Allow dynamic typing
+disallow_any_unimported = false # TODO
+disallow_any_expr = false # TODO
+disallow_any_decorated = false # TODO
+disallow_any_explicit = false # TODO
+disallow_any_generics = false # TODO
+disallow_subclassing_any = false # TODO
+# Untyped definitions and calls
+disallow_untyped_calls = false # TODO
+disallow_untyped_defs = false # TODO
+disallow_incomplete_defs = false # TODO
+check_untyped_defs = true
+disallow_untyped_decorators = true
+# Configuring warnings
+warn_redundant_casts = true
+warn_unused_ignores = false # Change from pandas
+# Suppressing errors
+disable_error_code = [
+    # Not all imports in these stubs are gonna be typed
+    "import-untyped",
+    # TODO
+    "assert-type",
+    "assignment",
+    "attr-defined",
+    "import-not-found",
+    "misc",
+    "name-defined",
+    "no-redef",
+    "operator",
+    "override",
+    "return",
+    "type-var",
+    "valid-type",
+    "var-annotated",
+]
+# Configuring error messages
+show_column_numbers = true
