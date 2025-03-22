@@ -17,6 +17,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 # from sklearn.model_selection import train_test_split
 from sklearn.linear_model import Lasso
+import helper_functions.spreadsheet_specific_helpers as helper
 
 
 # for stubs, if it says ur missing them do   mypy --install-types
@@ -74,6 +75,13 @@ X_GAME_COLS = [
     "When playing games, I consider myself to be...",
     "When playing games, I generally..."
 ]
+MOTIVATION_COLS = [
+        "Beating my competitors",
+        "Mastering the game",
+        "Earning the most points",
+        "Working with a team",
+        "Feeling immersed in the story/plot"
+    ]
 # V:AJ
 X_SEAL_COLS = [
     "When I use the SEAL Sudoku Sheet Tools, I feel like I am playing a game. ",
@@ -169,19 +177,24 @@ def split_xy(data, drop_cols):
     @returns: @type(ndarray): relevant x-values from data
     @returns: @type(ndarray): y-values from data"""
 
-    x_data = data.drop(columns=drop_cols + Y_COLS)
+    x_data = data.drop(columns=X_DROP_COLS + Y_COLS)
+
+    # split motivation columns:
+    split_col: DataFrame = helper.split_motivation_column(x_data)
+    x_data.drop('When playing games, I am most motivated by...', axis = 1, inplace = True)
+    x_data = pd.concat([x_data, split_col], axis=1)
 
     # handle X_SEAL_COLS: map disagree - agree as 1-5
     options_map = {'Strongly disagree': 1,
-                   'Disagree': 2,
-                   'Neutral': 3,
-                   'Agree': 4,
-                   'Strongly agree': 5
-                   }
+                    'Disagree': 2,
+                    'Neutral': 3,
+                    'Agree': 4,
+                    'Strongly agree': 5
+                    }
     x_data[X_SEAL_COLS] = x_data[X_SEAL_COLS].replace(options_map)
 
     # handle NaN via imputation
-    x_data[X_GAME_COLS[0:2]] = x_data[X_GAME_COLS[0:2]].fillna('No Response')
+    x_data[X_GAME_COLS[1:2]] = x_data[X_GAME_COLS[1:2]].fillna('No Response')
     x_data[X_GAME_COLS[2]] = x_data[X_GAME_COLS[2]].fillna(3)
     x_data[X_GAME_COLS[3:]] = x_data[X_GAME_COLS[3:]].fillna(3)
     x_data[X_DEMO_COLS] = x_data[X_DEMO_COLS].fillna('No Response')
@@ -191,7 +204,7 @@ def split_xy(data, drop_cols):
 
     # one-hot-encoding for categorical data (demographics, gaming)
     cat_col = x_data.select_dtypes(include=['object', 'category']).columns
-    x_data = pd.get_dummies(x_data, columns=cat_col)
+    x_data = pd.get_dummies(x_data, columns = cat_col)
     y_data = data[Y_COLS]
     return x_data, y_data
 

@@ -17,8 +17,8 @@ def split_motivation_column(df: DataFrame) -> DataFrame:
     if df.empty:
         raise ValueError("Dataframe is empty")
 
-    if len(df.columns) > 1:
-        raise ValueError("Only one column is allowed")
+    #if len(df.columns) > 1:
+    #   raise ValueError("Only one column is allowed")
 
     motivation_types = [
         "Beating my competitors",
