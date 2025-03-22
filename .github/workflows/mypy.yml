@@ -1,0 +1,29 @@
+name: Type Checking with MyPy
+
+on:
+  push:
+    branches: [main]  # Run on pushes to main
+  pull_request:
+    branches: [main]  # Run on PRs to main
+
+jobs:
+  mypy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"  # Match MyPy config
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install Dependencies
+        run: poetry install --no-interaction
+
+      - name: Run MyPy using pyproject.toml
+        run: poetry run mypy --config-file pyproject.toml .
