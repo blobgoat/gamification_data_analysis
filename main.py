@@ -32,8 +32,8 @@ import helper_functions.spreadsheet_specific_helpers as helper
 # get the data at
 SHEETURL: str = (
     "https://docs.google.com/spreadsheets/d/"
-    "1sptWDnGOyRcEyCHFYhyC8Y_zXGGM5jMpePRVusoSkFs/"
-    "edit?resourcekey=&gid=1530912831#gid=1530912831"
+    "1XcR48HZuC-mSFB-uKIxwPFhfRGVX7bWy100PhcLA8oM/"
+    "edit?resourcekey=&gid=1780925762#gid=1780925762"
 )
 
 # format for CSV https://docs.google.com/spreadsheets/d/
@@ -41,8 +41,8 @@ SHEETURL: str = (
 # out:csv&sheet=<SHEET_NAME>
 SHEET_CSV_URL: str = (
     "https://docs.google.com/spreadsheets/d/"
-    "1sptWDnGOyRcEyCHFYhyC8Y_zXGGM5jMpePRVusoSkFs/"
-    "gviz/tq?tqx=out:csv&sheet=Altered/congregrated data"
+    "1XcR48HZuC-mSFB-uKIxwPFhfRGVX7bWy100PhcLA8oM/"
+    "gviz/tq?tqx=out:csv&sheet=Congregated Data"
 )
 
 # global variables for our current data purposes
@@ -52,6 +52,7 @@ Y_COLS = [
     "On a scale of 1 - 5, how successful do your peers think you are in SEAL lab?",
     "On whole, how would you rate your satisfaction in SEAL lab?"
 ]
+
 # G:N
 X_DEMO_COLS = [
     "What group are you primarily affiliated with in SEAL Life (shows up in SEAL clan life)?",
@@ -66,7 +67,7 @@ X_DEMO_COLS = [
     "RELIGION (Congregated)"
 ]
 # O:U
-X_GAME_COLS = [
+X_PERSONALITY_COLS = [
     "When playing games, I am most motivated by...",
     "I consider myself to be...",
     "When playing games, I consider myself to be...",
@@ -146,7 +147,7 @@ def main():
     data = get_data()
 
     # pre-processing
-    x_data, y_data = split_xy(data, X_DROP_COLS)
+    x_data, y_data = split_xy(data)
     y1, y2, y3, y4 = [y_data.iloc[:, i] for i in range(y_data.shape[1])]
     x_nan = x_data.isna().sum().sum()
     y_nan = y_data.isna().sum().sum()
@@ -167,7 +168,7 @@ def main():
     linear_regression(x_train, y_train, x_val, y_val)
 
 
-def split_xy(data, drop_cols):
+def split_xy(data):
     """function to split the x and y data into separate ndarrays based on
     a set of columns to be dropped
 
