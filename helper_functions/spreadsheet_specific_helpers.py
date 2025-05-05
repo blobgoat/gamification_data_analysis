@@ -33,7 +33,7 @@ def split_motivation_column(df: DataFrame) -> DataFrame:
 
     for motivation in motivation_types:
         new_df[motivation] = df[
-            "When playing games, I am most motivated by..."
+            "Game motivation"
         ].apply(
             lambda x: 1 if motivation in x else 0
         )

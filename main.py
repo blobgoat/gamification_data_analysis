@@ -53,80 +53,80 @@ Y_COLS = [
     "On whole, how would you rate your satisfaction in SEAL lab?"
 ]
 
-# G:N
-X_DEMO_COLS = [
-    "What group are you primarily affiliated with in SEAL Life (shows up in SEAL clan life)?",
-    "AGE (Congregated)",
-    "Gender (CONGREGATED)",
-    "How do you describe your sexual orientation?",
-    "Which categories best describe you?",
-    "Do you have any chronic condition that substantially limit your life activities?",
-    "If you have a disability, please indicate (if comfortable) the terms"
-    " that best describe the condition(s)",
-    "Which economic class do you identify with?",
-    "RELIGION (Congregated)"
+
+# global variables for our current data purposes
+Y_COLS = [
+    "On a scale of 1 - 5 how successful do you feel you are in SEAL lab?",
+    "On a scale of 1 - 5, how successful to do you feel your teammates are in SEAL lab?",
+    "On a scale of 1 - 5, how successful do your peers think you are in SEAL lab?",
+    "On whole, how would you rate your satisfaction in SEAL lab?"
 ]
-# O:U
+
+X_DEMO_COLS = [
+    "All SEAL group affiliations",
+    "Age",
+    "Gender",
+    "Sexual orientation",
+    "Race",
+    "Chronic condition",
+    "Condition description",
+    "Economic class",
+    "Religion"
+]
+
 X_PERSONALITY_COLS = [
-    "When playing games, I am most motivated by...",
-    "I consider myself to be...",
-    "When playing games, I consider myself to be...",
-    "When playing games, I am generally...",
-    "When playing games, I prefer to be...",
-    "When playing games, I consider myself to be...",
-    "When playing games, I generally..."
+    "Internal / External game motivation",
+    "[Introverted - Extroverted]",
+    "[Critical - Trusting]",
+    "[Spontaneous - Conscientious]",
+    "[Self-conscious - Even-tempered]",
+    "[Prefer similarity - Am open to change]"
 ]
 MOTIVATION_COLS = [
-        "Beating my competitors",
-        "Mastering the game",
-        "Earning the most points",
-        "Working with a team",
-        "Feeling immersed in the story/plot"
-    ]
-# V:AJ
+    "Beating my competitors",
+    "Mastering the game",
+    "Earning the most points",
+    "Working with a team",
+    "Feeling immersed in the story/plot"
+]
+
 X_SEAL_COLS = [
-    "When I use the SEAL Sudoku Sheet Tools, I feel like I am playing a game. ",
-    "I consider myself to be highly experienced with the SEAL Sheet Tools.",
-    "I find the Sudoku Sheet Tools to be aesthetically pleasing.",
-    "I think SEAL rank reflect my work and my team's work accurately.",
-    "I think SEAL leaderboard reflect my work and my team's work accurately.",
-    "I think SEAL YBR reflect my work and my team's work accurately.",
-    "I think SEAL VisTools reflect my work and my team's work accurately.",
-    "I think SEAL RaceTrack reflect my work and my team's work accurately.",
-    "I think SEAL Battle Station reflect my work and my team's work accurately.",
-    "I think SEAL Command Center reflect my work and my team's work accurately.",
-    "I understand what my SEAL statistics mean (Lab HP, Sheet HP, YBR Gold Delta, and Training Score).",
-    "I know exactly how my actions affect my lab statistics (Lab HP, Sheet HP, YBR Gold Delta, and Training Score).",
+    "I feel like I am playing a game",
+    "I consider myself to be highly experienced.",
+    "Aesthetically pleasing.",
+    "Rank reflects work accurately.",
+    "Leaderboard reflects work accurately.",
+    "YBR reflects work accurately.",
+    "VisTools reflects work accurately.",
+    "RaceTrack reflects work accurately.",
+    "Battle Station reflects work accurately.",
+    "Command Center reflects work accurately.",
+    "I understand what my SEAL statistics mean.",
+    "I know exactly how my actions affect my lab statistics",
     "Using the Sudoku Sheet Tools helps me and my team stay on track.",
     "Using the Sudoku Sheet Tools encourages me to take risks and challenge myself.",
     "Using the Sudoku Sheet Tools makes my work in SEAL more enjoyable."
 ]
 # AO:AX
 X_USABILITY_COLS = [
-    "I think that I would like to use this system frequently.",
-    "I found the system unnecessarily complex.",
-    "I thought the system was easy to use.",
-    "I think that I would need the support of a technical person to be able to use this system.",
-    "I found the various functions in this system were well integrated.",
-    "I thought there was too much inconsistency in this system.",
-    "I would imagine that most people would learn to use this system very quickly.",
-    "I found the system very cumbersome to use.",
-    "I felt very confident using the system.",
-    "I needed to learn a lot of things before I could get going with this system."
+    'I think that I would like to use this system frequently',
+    'I found the system unnecessarily complex',
+    'I thought the system was easy to use',
+    'I think that I would need the support of a technical person to be able to use this system',
+    'I found the various functions in this system were well integrated',
+    'I thought there was too much inconsistency in this system',
+    'I would imagine that most people would learn to use this system very quickly',
+    'I found the system very cumbersome to use',
+    'I felt very confident using the system',
+    'I needed to learn a lot of things before I could get going with this system.']
+
+Y_COLS = ["Personal success",
+          "Teammate success",
+          "Peer success",
+          "Satisfaction in SEAL"
 ]
-X_DROP_COLS = [
-    "Timestamp",
-    "Sudoku Sheet Tools are all the tools you use when actively engaging with SEAL life. "
-    "Like Sudoku Clan Life, Dashboard, VisTools, RaceTrack, YBR, Kanban, Rank, Battle station, Venue, etc.",
-    "What groups are you affiliated with in SEAL Life?",
-    "Have you ever developed software as a programmer for Sudoku Sheet Tools?",
-    "What is your current age?",
-    "On scale of 1-10, how confusing were the questions on this survey?",
-    "If you have any, we appreciate any additional feedback on the structure and questions within the survey",
-    "SUS Overall score",
-    "Learnability subscore",
-    "Usability subscore"
-]
+
+X_DROP_COLS = ['All SEAL group affiliations', 'Game motivation']
 
 
 def get_data() -> DataFrame:  # idealy we dont want to us Any, but for now
@@ -154,35 +154,29 @@ def main():
     print("NaN values", x_nan, y_nan)
     # NaN check
 
-    # 70% train 20% validation 10% test
-    x_train, x_temp, y_train, y_temp = train_test_split(
-        x_data, y_data, test_size=0.3)
-    x_val, x_test, y_val, y_test = train_test_split(
-        x_temp, y_temp, test_size=0.33)
+    x_data, y_data = split_xy(data)
+    x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, test_size=0.15, random_state = 12)
 
     # normalization
-    x_train, x_val, x_test = standardize(x_train, x_val, x_test)
+    x_train, x_test = standardize(x_train, x_test)
+
     # feature selection
 
     # model
-    linear_regression(x_train, y_train, x_val, y_val)
+    linear_regression(x_train, y_train)
 
 
-def split_xy(data):
+def split_xy(data) -> Tuple[DataFrame, DataFrame]:
     """function to split the x and y data into separate ndarrays based on
     a set of columns to be dropped
 
-    @parameter: data @type(DataFrame): unprocessed data 
-    @parameter: drop_cols @type(ndarray): array of names of columns to drop
+    @parameter: data @type(DataFrame): rawdata
 
     @returns: @type(ndarray): relevant x-values from data
     @returns: @type(ndarray): y-values from data"""
-
-    x_data = data.drop(columns=X_DROP_COLS + Y_COLS)
-
-    # split motivation columns:
-    split_col: DataFrame = helper.split_motivation_column(x_data)
-    x_data.drop('When playing games, I am most motivated by...', axis = 1, inplace = True)
+    
+    split_col: DataFrame = helper.split_motivation_column(data)
+    x_data = data.drop(columns=X_DROP_COLS + Y_COLS)    # split motivation columns
     x_data = pd.concat([x_data, split_col], axis=1)
 
     # handle X_SEAL_COLS: map disagree - agree as 1-5
@@ -194,11 +188,8 @@ def split_xy(data):
                     }
     x_data[X_SEAL_COLS] = x_data[X_SEAL_COLS].replace(options_map)
 
-    # handle NaN via imputation
-    x_data[X_GAME_COLS[1:2]] = x_data[X_GAME_COLS[1:2]].fillna('No Response')
-    x_data[X_GAME_COLS[2]] = x_data[X_GAME_COLS[2]].fillna(3)
-    x_data[X_GAME_COLS[3:]] = x_data[X_GAME_COLS[3:]].fillna(3)
-    x_data[X_DEMO_COLS] = x_data[X_DEMO_COLS].fillna('No Response')
+    # Handle NaNs with data imputation of average
+    x_data[X_PERSONALITY_COLS[1:]] = x_data[X_PERSONALITY_COLS[1:]].fillna(3)
     x_data[X_SEAL_COLS] = x_data[X_SEAL_COLS].fillna(3)
     x_data[X_USABILITY_COLS] = x_data[X_USABILITY_COLS].fillna(3)
     data[Y_COLS] = data[Y_COLS].fillna(3)
@@ -210,22 +201,17 @@ def split_xy(data):
     return x_data, y_data
 
 
-def standardize(x_train, x_val, x_test):
+def standardize(x_train, x_test) -> Tuple[DataFrame, DataFrame]:
     """function that standardizes data to normal gaussian distribution.
     Standardization calculation is applied only to the training data.
 
     @parameter: x_train @type(nd.array) processed x training data to be standardized
-    @parameter: x_val @type(nd.array) processed x val data to be standardized
     @paremeter: x_test @type(nd.array) processed x-test data to be standardized
     """
     scaler = StandardScaler().fit(x_train)  # only fit on training data
-    x_train_stand = pd.DataFrame(scaler.transform(
-        x_train), columns=x_train.columns, index=x_train.index)
-    x_val_stand = pd.DataFrame(scaler.transform(
-        x_val), columns=x_val.columns, index=x_val.index)
-    x_test_stand = pd.DataFrame(scaler.transform(
-        x_test), columns=x_test.columns, index=x_test.index)
-    return x_train_stand, x_val_stand, x_test_stand
+    x_train_stand = pd.DataFrame(scaler.transform(x_train), columns=x_train.columns, index=x_train.index)
+    x_test_stand = pd.DataFrame(scaler.transform(x_test), columns=x_test.columns, index=x_test.index)
+    return x_train_stand, x_test_stand
 
 
 def feature_selection(x_train, y_train):
